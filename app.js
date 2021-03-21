@@ -4,6 +4,7 @@ const express = require('express');
 var bodyParser = require('body-parser')
 const Schema = mongoose.Schema;
 const cors = require('cors');
+const jackrabbit = require('jackrabbit');
 
 
 const dataSchema = new Schema({
@@ -24,17 +25,33 @@ mongoose.connection.once('open', () => {
     console.log('conneted to database');
 });
 
+//rabbitMQ
+
+var rabbit = jackrabbit(process.env.CLOUDAMQP_URL);
+var exchange = rabbit.default();
+
+// var hello = exchange.queue({ name: 'example_queue', durable: true });
+// //hello.consume(onMessage);
+
+// function onMessage(data, ack) {
+//     console.log('received:', data);
+//     ack("");
+// }
 
 app.get('/', (req, res) => {
     res.send('Home: POST /set to add, GET /getAll to get all')
 })
-
 app.post('/setRecord', (req, res) => {
-    console.log({ req });
+
     const d = new Data({ name: req.body.name, email: req.body.email })
     d.save();
+
+    exchange.publish({ msg: d._id }, { key: 'example_queue' });
+
     res.send('Updated')
 });
+
+
 
 app.get('/getRecord/:id', async (req, res) => {
     var id = req.params.id;
