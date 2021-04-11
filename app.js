@@ -8,8 +8,8 @@ const jackrabbit = require('jackrabbit');
 
 
 const dataSchema = new Schema({
-    name: String,
-    email: String,
+    tittle: String,
+    author: String,
 });
 
 const Data = mongoose.model('CollectionName', dataSchema);
